@@ -1,7 +1,7 @@
 
 const Total = ({parts}) => {
   return (
-    <p>Number of exercises {parts[0].exercises + parts[1].exercises + parts[2].exercises}</p>
+    <p><strong>total of {parts.reduce((accumulator, currentValue) => accumulator + currentValue.exercises, 0)} exercises</strong></p>
   )
 }
 
