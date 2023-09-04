@@ -13,7 +13,6 @@ const App = () => {
   useEffect(() => {
     axios.get('http://localhost:3001/persons')
       .then((response) => {
-        console.log(response.data);
         setPersons(response.data)
       })
   }, [])
@@ -29,15 +28,22 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
-  const addName = (event) => {
+  const addPerson = (event) => {
     event.preventDefault()
     const isPersonAdded = persons.some((person) => person.name === newName)
     if(isPersonAdded) {
+      setNewName('')
+      setNewNumber('')
       return alert(`${newName} is already added to phonebook`)
     }
-    setPersons(persons.concat({ name: newName, number: newNumber, id: persons.length + 1 }))
-    setNewName('')
-    setNewNumber('')
+
+    axios
+      .post('http://localhost:3001/persons', { name: newName, number: newNumber })
+      .then(response => {
+        setNewName('')
+        setNewNumber('')
+        setPersons(persons.concat(response.data))
+      })
   }
 
   const personsToDisplay = searchQuery === '' 
@@ -56,7 +62,7 @@ const App = () => {
     
       <h2>Add a new</h2>
       <PersonForm 
-        onSubmitHandler={addName} 
+        onSubmitHandler={addPerson} 
         name={newName} 
         number={newNumber}
         nameChangeHandler={handleNameChange}
