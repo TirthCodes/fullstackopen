@@ -127,7 +127,7 @@ const App = () => {
         .catch((error) => {
           console.error(error)
           setNotificationMessage({
-            message: `Failed to delete ${name} from the phonebook`,
+            message: `Information of ${name} has already been removed from server`,
             color: "red"
           })
         })
