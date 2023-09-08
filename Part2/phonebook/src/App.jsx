@@ -2,7 +2,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import { useEffect, useState } from 'react'
-import { getAll, create, deletePerson } from './services/persons.js'
+import { getAll, create, deletePerson, update } from './services/persons.js'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -28,20 +28,36 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    const isPersonAdded = persons.some((person) => person.name === newName)
-    if(isPersonAdded) {
-      setNewName('')
-      setNewNumber('')
-      return alert(`${newName} is already added to phonebook`)
+
+    const newPerson = {
+      name: newName,
+      number: newNumber,
     }
 
-    create({ name: newName, number: newNumber })
-      .then(response => 
-        setPersons(persons.concat(response.data))
-      );
+    const isPersonAdded = persons.find((person) => person.name === newName)
     
-    setNewName('')
-    setNewNumber('')
+    if(isPersonAdded) {
+      if(confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        update(isPersonAdded.id, newPerson)
+          .then((response) => {
+            setPersons(persons.map((person) => 
+              person.id !== isPersonAdded.id 
+                ? person 
+                : response.data
+            ))
+            setNewName('')
+            setNewNumber('')
+          })
+      }
+    } else {
+      create(newPerson)
+        .then((response) => {
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber('')
+        });
+      
+    }
   }
 
   const removePerson = (id, name) => {
