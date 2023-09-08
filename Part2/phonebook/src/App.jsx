@@ -2,7 +2,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import { useEffect, useState } from 'react'
-import { getAll, create } from './services/persons.js'
+import { getAll, create, deletePerson } from './services/persons.js'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -44,6 +44,16 @@ const App = () => {
     setNewNumber('')
   }
 
+  const removePerson = (id, name) => {
+    if(confirm(`Delete ${name} ?`)) {
+      deletePerson(id)
+        .then(() => 
+          getAll()
+            .then((persons) => setPersons(persons))
+        )
+    }
+  }
+
   const personsToDisplay = searchQuery === '' 
     ? persons 
     : persons.filter((person) => 
@@ -68,7 +78,10 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <Persons persons={personsToDisplay} />
+      <Persons 
+        persons={personsToDisplay} 
+        deletePersonHandler={removePerson}
+      />
     </div>
   )
 }
