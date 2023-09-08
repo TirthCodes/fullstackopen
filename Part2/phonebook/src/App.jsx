@@ -1,6 +1,7 @@
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 import { useEffect, useState } from 'react'
 import { getAll, create, deletePerson, update } from './services/persons.js'
 
@@ -9,12 +10,29 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState({
+    message: null,
+    color: ''
+  })
 
   useEffect(() => {
     getAll()
       .then(response => setPersons(response))
+      .catch((error) => {
+        console.error(error)
+        setNotificationMessage({
+          message: "Failed to get Person's details from phonebook",
+          color: "red"
+        })
+      })
+
+    setTimeout(() => {
+      setNotificationMessage({
+        message: null,
+        color: ''
+      })
+    }, 3000)
   }, [])
-  
 
   const handleNameChange = (event) => {
     console.log(event.target.value);
@@ -45,28 +63,81 @@ const App = () => {
                 ? person 
                 : response.data
             ))
+            setNotificationMessage({
+              message: `Successfully updated the number of ${newName}`,
+              color: "green"
+            })
             setNewName('')
             setNewNumber('')
           })
+          .catch((error) => {
+            console.error(error)
+            setNotificationMessage({
+              message: `Failed to update the number of ${newName}`,
+              color: "red"
+            })
+          })
+
+        setTimeout(() => {
+          setNotificationMessage({
+            message: null,
+            color: ''
+          })
+        }, 3000)
       }
     } else {
       create(newPerson)
         .then((response) => {
           setPersons(persons.concat(response.data))
+          setNotificationMessage({
+            message: `Successfully added ${newName} to the phonebook`,
+            color: "green"
+          })
           setNewName('')
           setNewNumber('')
-        });
-      
+        })
+        .catch((error) => {
+          console.error(error)
+          setNotificationMessage({
+            message: `Failed to add ${newName} to the phonebook`,
+            color: "red"
+          })
+        })
+
+      setTimeout(() => {
+        setNotificationMessage({
+          message: null,
+          color: ''
+        })
+      }, 3000)
     }
   }
 
   const removePerson = (id, name) => {
     if(confirm(`Delete ${name} ?`)) {
       deletePerson(id)
-        .then(() => 
+        .then(() => {
+          setNotificationMessage({
+            message: `Successfully deleted ${name} from phonebook`,
+            color: "green"
+          })
           getAll()
             .then((persons) => setPersons(persons))
-        )
+        })
+        .catch((error) => {
+          console.error(error)
+          setNotificationMessage({
+            message: `Failed to delete ${name} from the phonebook`,
+            color: "red"
+          })
+        })
+
+      setTimeout(() => {
+        setNotificationMessage({
+          message: null,
+          color: ''
+        })
+      }, 3000)
     }
   }
 
@@ -79,6 +150,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notificationMessage={notificationMessage}  />
       <Filter 
         value={searchQuery} 
         onChangeHandler={(event) => setSearchQuery(event.target.value)} 
