@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import CountryInfo from "./components/CountryInfo";
 
 const App = () => {
   const [countryName, setCountryName] = useState('');
   const [countries, setCountries] = useState([]);
+  const [showCountry, setShowCountry] = useState({
+    show: false,
+    selectedCountry: ''
+  })
 
   useEffect(() => {
     axios.get(`https://studies.cs.helsinki.fi/restcountries/api/all`)
@@ -12,7 +17,20 @@ const App = () => {
       })
   }, [])
 
-  const countryChangeHandler = (event) => setCountryName(event.target.value)
+  const countryChangeHandler = (event) => {
+    setCountryName(event.target.value)
+    setShowCountry({
+      show: false,
+      selectedCountry: ''
+    })
+  }
+
+  const showCountryInfo = (country) => {
+    setShowCountry({
+      show: true,
+      selectedCountry: country
+    })
+  }
 
   const countriesToDisplay = 
     countryName === '' 
@@ -24,35 +42,27 @@ const App = () => {
   return (
     <>
       find countries <input value={countryName} onChange={countryChangeHandler} />
-      {countriesToDisplay.length > 9 
+      {countriesToDisplay.length > 10 
         ? <div>Too many matches specify another filter</div>
         : 
         <>
           {countriesToDisplay.length === 1
             ?
-            <>
-              <h1>{countriesToDisplay[0].name.common}</h1>
-              <div>capital {countriesToDisplay[0].capital}</div>
-              <div>area {countriesToDisplay[0].area}</div>
-              <p><strong>languages:</strong></p>
-              <ul>
-                {Object.values(countriesToDisplay[0].languages).map((language) => 
-                  <li key={language}>{language}</li>
-                )}
-              </ul>
-              <img
-                src={countriesToDisplay[0].flags.png} 
-                alt={countriesToDisplay[0].flags.alt}
-                width={150}
-              /> 
-            </>
+            <CountryInfo country={countriesToDisplay[0]} />
             :
             <>
-              {countriesToDisplay.map((country) => 
-                <div key={country.name.common}>{country.name.common}</div>
-              )}
+              {showCountry.show 
+                ? <CountryInfo country={showCountry.selectedCountry} />
+                :
+                <>
+                  {countriesToDisplay.map((country) => 
+                    <div key={country.name.common}>{country.name.common} <button key={country.name.common} onClick={() => showCountryInfo(country)}>show</button> </div>
+                  )}
+                </>
+              }
             </>
           }
+          
         </>
       }
     </>
